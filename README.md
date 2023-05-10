@@ -135,6 +135,8 @@ git status
 git log
 ```
 
+Przy wykonaniu polecenia `git log` zwróć uwagę na dodane etykiety (xy_print_foo, master, v1.0.0).
+
 Dodaj plik `foo.cpp` z następującą zawartością:
 
 ```cpp
@@ -188,14 +190,14 @@ git log
 Skompiluj projekt i sprawdź czy działa:
 
 ```
-g++ -o hello main.cpp
+g++ -o hello main.cpp foo.cpp
 ./hello
 ```
 
-Przejdź na główną gałąź projektu:
+Przejdź na główną gałąź projektu (w zależności od wersji może ona nazywać się również "master"):
 
 ```bash
-git checkokut main
+git checkout main
 ```
 
 Przyłącz gałąź `xy_print_foo` do głównej gałęzi projektu:
@@ -204,7 +206,7 @@ Przyłącz gałąź `xy_print_foo` do głównej gałęzi projektu:
 git merge xy_print_foo
 ```
 
-Prześledź historię kommitów:
+Prześledź historię commit-ów:
 
 ```bash
 git log --oneline --graph --all
@@ -304,14 +306,14 @@ git log
 Skompiluj projekt i sprawdź czy działa:
 
 ```
-g++ -o hello main.cpp
+g++ -o hello main.cpp bar.cpp
 ./hello
 ```
 
 Przejdź na główną gałąź projektu:
 
 ```bash
-git checkokut main
+git checkout main
 ```
 
 Przyłącz gałąź `xy_print_bar` do głównej gałęzi projektu:
@@ -354,7 +356,7 @@ Dodaj komentarz do pliku `foo.hpp`:
 
 ```cpp
 /**
- * Prints "foo" with short size in bytes in your architecture.
+ * Prints "foo" with size of short in bytes in your architecture.
  */
 void foo();
 ```
@@ -397,7 +399,7 @@ git log
 
 Następnie wykonaj powyższe czynności dla "bar".
 
-Przejdź na branch `main`
+Przejdź na branch `main` (albo `master` jeśli tak nazywa się u Ciebie główny branch):
 
 ```bash
 git checkout main
@@ -447,6 +449,7 @@ Dodaj zmiany do repozytorium:
 
 ```bash
 git status
+git diff
 git add .
 git status
 git commit
