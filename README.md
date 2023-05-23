@@ -675,9 +675,21 @@ Pomocne do tego będą następujące komendy:
 
 ### Git-internals
 
+Zrozum do czego służą poszczególne komponenty repozytorium.
+
 ```bash
 ls .git
 ```
 
+Rozpakowanie zawartości pliku obiektowego.
 
+```bash
+git cat-file -p [SHA-1]
+```
+
+Typ pliku można poznać poleceniem:
+
+```bash
+git cat-file -t [SHA-1]
+```
 
