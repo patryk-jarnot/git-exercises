@@ -486,3 +486,198 @@ git log xy_foo_short_size..xy_bar_long_size
 
 ### Cherry-pick
 
+Będąc na branch-u `xy_bar_long_size` dodaj do pliku `.gitignore` katalog `data/` otrzymując następującą zawartość:
+
+```bash
+hello
+data/
+```
+
+Utwórz plik `input.json` w katalogu `data/`, a następnie zrób nowy commmit.
+
+Załóżmy teraz, że na branch-u `xy_foo_short_size` również chcielibyśmy mieć taką zmianę.
+Przechodzimy w tym celu ten branch:
+
+```bash
+git checkout xy_foo_short_size
+```
+
+Następnie kopiujemy na aktualny branch pierwszy commit z branch-a `xy_bar_long_size`:
+
+```bash
+git cherry-pick xy_bar_long_size
+```
+
+Pytanie: Jak pobrać dwa ostatnie commit-y z innego branch-a? Jak pobrać drugi i trzeci od końca commit z innego branch-a?
+
+### Selekcja commit-ów
+
+Wiele komend git-a przyjmuje jako parametr commit-y na których one operują, np: checkout, revert, rebase. Do wyboru commit-a możemy skorzystać z nazwy branch-a, wskaźnika na aktualny commit, jego SHA-1 itd. Dodatkowo można się odwoływać do commit-ów w sposób relatywny. Służą do tego modyfikatory `^` oraz `~`:
+
+* ^
+    Pozwala na wybranie kolejnego commit-a rodzica jeśli jest ich więcej.
+* ~
+    Modyfikator ten pozwala poruszać się w głąb historii.
+
+### Show
+
+Polecenie `git show` służy do wyświetlania szczegółowych informacji o commit-ach.
+Możemy jako parametr podać dowolny commit z naszego repozytorium.
+
+### Rebase
+
+Alternatywą do merge-owania jest wykonanie rebase-ów.
+Z jednej strony pozwala to na przechowywanie liniowej historii, która jest prostrza do czytania.
+Z drugiej strony nie przechowuje informacji o tworzeniu branch-y i wymaga modyfikowania histoii, co może powodować problemy.
+
+Aby wcielić branch-e `xy_foo_short_size` oraz `xy_bar_long_size` do branch-a `master`, należy wykonać następującą sekwencje poleceń:
+
+```bash
+git checkout master
+git rebase xy_bar_long_size
+git checkout xy_foo_short_size
+git rebase master
+git checkout master
+git checkout xy_foo_short_size
+```
+
+Jest trochę więcej roboty, ale też historia jest trochę prostrza.
+
+```bash
+git log --oneline --graph --all
+```
+
+`rebase` jest w rzeczywistości bardzo złożoną komendą, która ma o wiele większe możliwości.
+Możemy wykonać ją w trybie interaktywnym modyfikując na różny sposób trzy ostatnie commity.
+
+```bash
+git rebase -i HEAD~3
+```
+
+### Amend
+
+```bash
+git commit --amend
+```
+
+```bash
+git add .
+git commit --amend
+```
+
+### Reset
+
+```bash
+git log --graph --oneline --all
+git reset --soft HEAD~
+git log --graph --oneline --all
+```
+
+```bash
+git reset --mixed HEAD~
+git log --graph --oneline --all
+```
+
+```bash
+git reset --hard HEAD~
+git log --graph --oneline --all
+```
+
+### Revert
+
+```bash
+git revert HEAD~
+```
+
+### Stash
+
+Dodaj pare debug printów do `main.cpp`.
+
+```bash
+git status
+```
+
+Widzimy, że mamy jakieś zmiany w pliku `main.cpp`.
+Stwierdzamy, że to są bardzo przydatne printy, które możemy jeszcze w przyszłości wykorzystać.
+Zachowajmy zatem te zmiany wykorzystując `stash`.
+
+```bash
+git stash push -m "Debug prints"
+```
+
+```bash
+git stash list
+```
+
+```bash
+git stash apply stash@{0}
+```
+
+### Blame
+
+```bash
+git blame main.cpp
+```
+
+### Bisect
+
+Wklej następującą zawartość do pliku `script.sh`:
+
+```bash
+#!/bin/bash
+
+grep "foo();" main.cpp && exit 1
+exit 0
+```
+
+Aby znaleźć rewizję, w której dodano wywołanie funkcji `foo` w pliku `main.cpp`, należy wykonać następującą sekwencje poleceń:
+
+```
+git bisect start
+git bisect bad
+git bisect good 662fcbcf7806bb7bc340d45db2b50ce5bb62f586
+git bisect run ./script.sh
+```
+
+### Przeszukiwanie repozytorium
+
+Git daje możliwość przeszukiwania histoii zmian po łańcuchu znaków.
+
+Aby znaleźć wszystkie commit-y zawierające daną zmianę, należy skorzystać z polecenia:
+
+```
+git log -S [string]
+```
+
+Można też wychorzystać wyrażenia regularne.
+Wtedy ustawiamy przełącznik `-G`.
+
+```
+git log -G [pattern]
+```
+
+### Clean untracked files
+
+Zdarza się, że budując projekt, albo generując inne pliki wybierzemy zły katalog.
+Może to doprowadzić do sytuacji w której mamy sporo plików porozrzucanych po projekcie, które musimy usunąć.
+Możemy tego dokonać ręcznie, albo wykorzystać git-a, aby zrobił to za nas.
+Pomocne do tego będą następujące komendy:
+
+* Sprawdź, które pliki zostaną usunięte:
+    ```
+    git clean -dn
+    ```
+
+* Usuń wskazane pliki:
+    ```
+    git clean -df
+    ```
+
+### Git-internals
+
+```bash
+ls .git
+```
+
+
+
