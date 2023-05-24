@@ -556,9 +556,28 @@ git rebase -i HEAD~3
 
 ### Amend
 
+Aby zmodyfikować komentarz do poprzedniego commit-a należy wykonać polecenie:
+
 ```bash
 git commit --amend
 ```
+
+Możemy również dodać zmiany w plikach włączając je do stage area.
+Zmodyfikuj plik `foo.cpp` nie wypisując informacji o architekturze komputera otrzymując następującą zawartość.
+
+```cpp
+#include "foo.hpp"
+#include <iostream>
+
+using namespace std;
+
+void foo() {
+    cout << "foo\n";
+    cout << "Size of long is " << sizeof(short) << "\n";
+}
+```
+
+Następnie dodaj zmiany do poprzedniego commit-a.
 
 ```bash
 git add .
@@ -567,16 +586,43 @@ git commit --amend
 
 ### Reset
 
-```bash
-git log --graph --oneline --all
-git reset --soft HEAD~
-git log --graph --oneline --all
+Dodaj plik `make` z następującą zawartością:
+
 ```
+all:
+	g++ main.cpp foo.cpp bar.cpp
+```
+
+Dodaj zmianę do repozytorium.
+
+```bash
+git add .
+git commit
+```
+
+Wykonaj polecenie `make`.
+Orientujemy się, że plik miał się nazywać `Makefile`.
+Cofamy ostatni commit, zmieniamy nazwę i commit-ujemy ponownie.
 
 ```bash
 git reset --mixed HEAD~
 git log --graph --oneline --all
+mv make Makefile
+git add .
+git commit
 ```
+
+Wykonaj polecenie `make`.
+Uruchamiamy program `./hello`
+Orientujemy się, że w pliku `Makefile` nie wzkazaliśmy nazwy pliku wynikowego.
+
+```bash
+git reset --soft HEAD~
+git log --graph --oneline --all
+```
+
+Na którymś ze spotkań padło, że nie będziemy używać pliku `Makefile` tylko narzędzi auto-tools do zarządzania projektem.
+Chcemy całkowicie wycofać zmianę bez zatrzymywania modyfikacji.
 
 ```bash
 git reset --hard HEAD~
@@ -585,35 +631,80 @@ git log --graph --oneline --all
 
 ### Revert
 
+Wyświetl historię git-a i znajdź commit, który chciałbyś cofnąć.
+
 ```bash
-git revert HEAD~
+git log --graph --oneline --all
 ```
+
+Jeśli wybrałeś commit-a ze środka historii to prawdopodobnie nie ma możliwości, żeby cofnąć go reset-em.
+Możemy natomiast zrobić to revertem.
+
+```bash
+git revert [SHA-1]
+```
+
+Wyświetl historię i zobacz co się stało.
+
+```bash
+git log --graph --oneline --all
+git show HEAD
+```
+
+W efekcie został utworzony nowy commit, który jest lustrzanym odbiciem tego, który został wybrany.
 
 ### Stash
 
-Dodaj pare debug printów do `main.cpp`.
+Dodaj pare debug printów do `main.cpp` przykładowo uzyskując następującą zawartość.
+
+```cpp
+#include "foo.hpp"
+#include "bar.hpp"
+#include <iostream>
+
+using namespace std;
+
+int main() {
+    cout << "debug 1\n";
+    bar();
+    cout << "debug 2\n";
+    foo();
+    cout << "Hello world!\n";
+    return 0;
+}
+```
+
+Wyświetl wprowadzone zmiany.
 
 ```bash
 git status
+git diff
 ```
 
 Widzimy, że mamy jakieś zmiany w pliku `main.cpp`.
-Stwierdzamy, że to są bardzo przydatne printy, które możemy jeszcze w przyszłości wykorzystać.
+Stwierdzamy, że to są bardzo przydatne print-y, które możemy jeszcze w przyszłości wykorzystać.
 Zachowajmy zatem te zmiany wykorzystując `stash`.
 
 ```bash
 git stash push -m "Debug prints"
 ```
 
+Polecenie `git stash` tworzy nowego commit-a w osobnym drzewie.
+Możemy wszystkie te commit-y wylistować poleceniem.
+
 ```bash
 git stash list
 ```
+
+Aby przywrócić schowane zmiany, w dowolnym momencie możemy wykonać polecenie.
 
 ```bash
 git stash apply stash@{0}
 ```
 
 ### Blame
+
+Kto i kiedy wprowadził tę linie kodu?
 
 ```bash
 git blame main.cpp
@@ -630,13 +721,27 @@ grep "foo();" main.cpp && exit 1
 exit 0
 ```
 
+Dodaj do skryptu uprawnienia wykonania:
+
+```bash
+chmod +x script.sh
+```
+
 Aby znaleźć rewizję, w której dodano wywołanie funkcji `foo` w pliku `main.cpp`, należy wykonać następującą sekwencje poleceń:
 
 ```
 git bisect start
 git bisect bad
-git bisect good 662fcbcf7806bb7bc340d45db2b50ce5bb62f586
+git bisect good v0.0.0
 git bisect run ./script.sh
+```
+
+Wracamy na branch master i zachowujemy skrypt na przyszłość.
+
+```bash
+git bisect reset
+git add .
+git stash push -m "bisect script template"
 ```
 
 ### Przeszukiwanie repozytorium
@@ -646,14 +751,14 @@ Git daje możliwość przeszukiwania histoii zmian po łańcuchu znaków.
 Aby znaleźć wszystkie commit-y zawierające daną zmianę, należy skorzystać z polecenia:
 
 ```
-git log -S [string]
+git log -p -S "foo();"
 ```
 
 Można też wychorzystać wyrażenia regularne.
 Wtedy ustawiamy przełącznik `-G`.
 
 ```
-git log -G [pattern]
+git log -p -G "sizeof\(\w+\)"
 ```
 
 ### Clean untracked files
